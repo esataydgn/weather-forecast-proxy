@@ -1,5 +1,7 @@
 package com.forecast.weatherforecast.exception.api;
 
+import com.forecast.weatherforecast.exception.validation.CalculationException;
+import com.forecast.weatherforecast.exception.validation.InsufficientDataFromAPI;
 import com.forecast.weatherforecast.exception.validation.InvalidCityNameException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -109,6 +111,20 @@ public class ForecastControllerAdvices extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handle(final Exception ex, final WebRequest request) {
         final ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(),
                 "The city provided was not found");
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
+    @ExceptionHandler({InsufficientDataFromAPI.class})
+    public ResponseEntity<Object> handleInsufficientData(final Exception ex, final WebRequest request) {
+        final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(),
+                "no data is retrieved from API!!!");
+        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
+    @ExceptionHandler({CalculationException.class})
+    public ResponseEntity<Object> handleCalculationException(final Exception ex, final WebRequest request) {
+        final ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(),
+                "An exception occur while calculation!!!");
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
