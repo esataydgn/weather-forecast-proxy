@@ -52,7 +52,7 @@ Swagger documentation can be reached [here Swagger-UI](http://localhost:8080/swa
 
 # Example of usage 
 
-[http://localhost:8080/data?city=istanbul](http://localhost:8080/data?city=istanbul)
+[http://localhost:8080/data/istanbul](http://localhost:8080/data/istanbul)
 
 Response should be like this.
 
@@ -64,7 +64,7 @@ Response should be like this.
 
 # Example of wrong parameter
 
-[http://localhost:8080/data?city=istanbul123](http://localhost:8080/data?city=istanbul123)
+[http://localhost:8080/data/istanbul123](http://localhost:8080/data/istanbul123)
 Response will be like this when the city is not exist or the city parameter has not been sent.
 
 `{
