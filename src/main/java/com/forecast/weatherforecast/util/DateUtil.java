@@ -13,23 +13,15 @@ public class DateUtil {
 	private static final int FORECAST_DAYS = 3;
 	private static final int DAY_START = 6;
 	private static final int DAY_END = 18;
-	private LocalDateTime lastDayOfForecast;
-
-	public DateUtil() {
-		super();
-		this.lastDayOfForecast = getLastDayOfForecast();
-	}
-
-	public LocalDateTime getLastDayOfForecast() {
-		Instant today = Instant.now();
-		LocalDateTime maxLimit = LocalDateTime.ofInstant(today, ZoneOffset.UTC);
-		maxLimit = maxLimit.plus(FORECAST_DAYS, ChronoUnit.DAYS);
-		return maxLimit;
-	}
 	
 	public boolean isDateInRange(Instant dt) {
 		LocalDateTime date = LocalDateTime.ofInstant(dt, ZoneOffset.UTC);
-		return date.getDayOfYear() <= lastDayOfForecast.getDayOfYear();
+
+		Instant today = Instant.now();
+		LocalDateTime maxLimit = LocalDateTime.ofInstant(today, ZoneOffset.UTC);
+		maxLimit = maxLimit.plus(FORECAST_DAYS, ChronoUnit.DAYS);
+
+		return date.getDayOfYear() <= maxLimit.getDayOfYear();
 	}
 
 	public boolean isDayTimeForecast(Instant dt) {

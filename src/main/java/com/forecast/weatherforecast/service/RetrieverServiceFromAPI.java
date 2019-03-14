@@ -2,7 +2,7 @@ package com.forecast.weatherforecast.service;
 
 import com.forecast.weatherforecast.dto.WeatherAverages;
 
-public interface ForecastService {
+public interface RetrieverServiceFromAPI {
 
-    public WeatherAverages getForecastByCityName(String cityName);
+    WeatherAverages getForecastByCityName(String cityName);
 }

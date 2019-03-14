@@ -2,15 +2,12 @@ package com.forecast.weatherforecast.service.serviceImpl;
 
 import com.forecast.weatherforecast.dto.WeatherAverages;
 import com.forecast.weatherforecast.dto.WeatherDetails;
-import com.forecast.weatherforecast.enumType.ForecastType;
 import com.forecast.weatherforecast.exception.validation.CalculationException;
 import com.forecast.weatherforecast.util.DateUtil;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.ToDoubleFunction;
 
 @Service
 public class ForecastCalculatorService {
@@ -23,55 +20,47 @@ public class ForecastCalculatorService {
 
     public WeatherAverages calculateAvarages(List<WeatherDetails> weatherDetails) {
 
-        WeatherAverages weatherAverages = new WeatherAverages();
-        Map<ForecastType, List<WeatherDetails>> forecastListMap = findForecastTypes(weatherDetails);
-
         try {
-            weatherAverages.setDailyAverageTemperature(formatValue(calculateDailyAverage(forecastListMap.get(ForecastType.DAILY))));
-            weatherAverages.setNightlyAverageTemperature(formatValue(calculateNightlyAverage(forecastListMap.get(ForecastType.NIGHTLY))));
-            weatherAverages.setPressureAverage(formatValue(calculatePressureAverage(forecastListMap.get(ForecastType.PRESSURE))));
+            return findForecastTypes(weatherDetails);
         } catch (Exception e) {
             throw new CalculationException("An exception occur while calculation!!!");
         }
-        return weatherAverages;
+
     }
 
-    private Map<ForecastType, List<WeatherDetails>> findForecastTypes(List<WeatherDetails> weatherDetails) {
-        List<WeatherDetails> dailyForecasts = new ArrayList<>();
-        List<WeatherDetails> nightlyForecasts = new ArrayList<>();
-        List<WeatherDetails> pressureForecasts = new ArrayList<>();
+    private WeatherAverages findForecastTypes(List<WeatherDetails> weatherDetails) {
+        WeatherAverages weatherAverages = new WeatherAverages();
+        Double dailyAvarage = 0.00;
+        Double nightlyAvarage = 0.00;
+        Double pressureAvarage = 0.00;
+        int dailyCount = 0;
+        int totalCount = 0;
+
+
         for (WeatherDetails weatherDetail : weatherDetails) {
             if (dateUtil.isDateInRange(weatherDetail.getDt())) {
                 if (dateUtil.isDayTimeForecast(weatherDetail.getDt())) {
-                    dailyForecasts.add(weatherDetail);
+                    dailyAvarage += weatherDetail.getMain().getTemp();
+                    dailyCount++;
                 } else {
-                    nightlyForecasts.add(weatherDetail);
+                    nightlyAvarage += weatherDetail.getMain().getTemp();
                 }
-                pressureForecasts.add(weatherDetail);
+                pressureAvarage += weatherDetail.getMain().getTemp();
+                totalCount++;
             }
         }
-        Map<ForecastType, List<WeatherDetails>> forecastTypeListMap = new HashMap<>();
 
-        forecastTypeListMap.put(ForecastType.DAILY, dailyForecasts);
-        forecastTypeListMap.put(ForecastType.NIGHTLY, nightlyForecasts);
-        forecastTypeListMap.put(ForecastType.PRESSURE, pressureForecasts);
+        weatherAverages.setDailyAverageTemperature(dailyAvarage / dailyCount);
+        weatherAverages.setNightlyAverageTemperature(nightlyAvarage / (totalCount - dailyCount));
+        weatherAverages.setPressureAverage(pressureAvarage / totalCount);
 
-        return forecastTypeListMap;
+        return weatherAverages;
     }
 
-    private double calculateDailyAverage(List<WeatherDetails> weatherDetails) {
-        return weatherDetails.stream().mapToDouble(wd -> wd.getMain().getTemp()).summaryStatistics().getAverage();
+    private double calculateAverage(List<WeatherDetails> weatherDetails, ToDoubleFunction<WeatherDetails> getDouble) {
+        return weatherDetails.stream().mapToDouble(getDouble).summaryStatistics().getAverage();
     }
 
-    private double calculateNightlyAverage(List<WeatherDetails> weatherDetails) {
-        return weatherDetails.stream().mapToDouble(wd -> wd.getMain().getTemp()).summaryStatistics().getAverage();
-    }
-
-    private double calculatePressureAverage(List<WeatherDetails> weatherDetails) {
-        return weatherDetails.stream()
-                .mapToDouble(detail -> detail.getMain().getPressure())
-                .summaryStatistics().getAverage();
-    }
 
     private double formatValue(double doubletoFormat) {
         return Math.round(doubletoFormat * 100) / 100D;

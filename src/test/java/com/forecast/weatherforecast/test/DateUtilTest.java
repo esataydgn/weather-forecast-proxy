@@ -19,7 +19,7 @@ public class DateUtilTest {
     @Test
     public void testIsDateInRange() {
         LocalDateTime expectedMaxLimit = LocalDateTime.now().plusDays(2);
-        assertThat(dateUtil.isDateInRange(expectedMaxLimit.toInstant(ZoneOffset.UTC)));
+        assertThat(dateUtil.isDateInRange(expectedMaxLimit.toInstant(ZoneOffset.UTC))).isEqualTo(true);
     }
 
     @Test

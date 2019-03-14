@@ -5,10 +5,10 @@ import com.forecast.weatherforecast.dto.WeatherDetails;
 import com.forecast.weatherforecast.dto.WeatherForecast;
 import com.forecast.weatherforecast.exception.validation.InsufficientDataFromAPI;
 import com.forecast.weatherforecast.exception.validation.InvalidCityNameException;
-import com.forecast.weatherforecast.service.ForecastService;
+import com.forecast.weatherforecast.service.RetrieverServiceFromAPI;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.Objects;
 
 
 @Service
-public class ForecastServiceImpl implements ForecastService {
+class RetrieverServiceFromAPIFromApiImp implements RetrieverServiceFromAPI {
 
     @Value("${openweathermap.apiKey}")
     private String apiKey;
@@ -26,19 +26,20 @@ public class ForecastServiceImpl implements ForecastService {
 
     private ForecastCalculatorService forecastCalculatorService;
 
-    public ForecastServiceImpl(ForecastCalculatorService forecastCalculatorService) {
+    public RetrieverServiceFromAPIFromApiImp(ForecastCalculatorService forecastCalculatorService) {
         this.forecastCalculatorService = forecastCalculatorService;
     }
 
     @Override
     public WeatherAverages getForecastByCityName(String cityName) {
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<WeatherForecast> response = null;
-        WeatherForecast forecastResponse = null;
+        WeatherForecast forecastResponse;
         try {
 
+
+
             forecastResponse = restTemplate.getForObject(createCityUrl(cityName), WeatherForecast.class);
-        } catch (Exception e) {
+        }catch (HttpClientErrorException ex){
             throw new InvalidCityNameException(cityName + " is invalid!!!");
         }
 
